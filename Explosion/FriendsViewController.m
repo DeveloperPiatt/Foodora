@@ -42,15 +42,6 @@
         abort();
     }
     
-    //[self setupDummyData];
-    
-    
-    self.fetchedResultsController = nil;
-    if (![[self fetchedResultsController]performFetch:&error]) {
-        NSLog(@"Error! %@", error);
-        abort();
-    }
-    
     
     
 }

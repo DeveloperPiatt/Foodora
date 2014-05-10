@@ -25,6 +25,7 @@
 		6AFEE624191E7CAF00ACC9A3 /* Users.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE623191E7CAF00ACC9A3 /* Users.m */; };
 		6AFEE627191E7CB000ACC9A3 /* Restaurants.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE626191E7CB000ACC9A3 /* Restaurants.m */; };
 		6AFEE62A191E7CB000ACC9A3 /* Opinions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE629191E7CB000ACC9A3 /* Opinions.m */; };
+		6AFEE62D191E897B00ACC9A3 /* FoodTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE62C191E897B00ACC9A3 /* FoodTableViewCell.m */; };
 		6AFFCC551900492E002FE74D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AFFCC541900492E002FE74D /* Foundation.framework */; };
 		6AFFCC571900492E002FE74D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AFFCC561900492E002FE74D /* CoreGraphics.framework */; };
 		6AFFCC591900492E002FE74D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AFFCC581900492E002FE74D /* UIKit.framework */; };
@@ -90,6 +91,8 @@
 		6AFEE626191E7CB000ACC9A3 /* Restaurants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Restaurants.m; sourceTree = "<group>"; };
 		6AFEE628191E7CB000ACC9A3 /* Opinions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Opinions.h; sourceTree = "<group>"; };
 		6AFEE629191E7CB000ACC9A3 /* Opinions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Opinions.m; sourceTree = "<group>"; };
+		6AFEE62B191E897B00ACC9A3 /* FoodTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FoodTableViewCell.h; sourceTree = "<group>"; };
+		6AFEE62C191E897B00ACC9A3 /* FoodTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FoodTableViewCell.m; sourceTree = "<group>"; };
 		6AFFCC511900492E002FE74D /* Explosion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Explosion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AFFCC541900492E002FE74D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6AFFCC561900492E002FE74D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -179,6 +182,8 @@
 			children = (
 				6AAC405D191C4DEA00E7F945 /* FoodViewController.h */,
 				6AAC405E191C4DEA00E7F945 /* FoodViewController.m */,
+				6AFEE62B191E897B00ACC9A3 /* FoodTableViewCell.h */,
+				6AFEE62C191E897B00ACC9A3 /* FoodTableViewCell.m */,
 			);
 			name = FoodView;
 			sourceTree = "<group>";
@@ -410,6 +415,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6AFEE627191E7CB000ACC9A3 /* Restaurants.m in Sources */,
+				6AFEE62D191E897B00ACC9A3 /* FoodTableViewCell.m in Sources */,
 				6AFFCC701900492E002FE74D /* MyScene.m in Sources */,
 				6AFFCC6D1900492E002FE74D /* ViewController.m in Sources */,
 				6AFEE62A191E7CB000ACC9A3 /* Opinions.m in Sources */,

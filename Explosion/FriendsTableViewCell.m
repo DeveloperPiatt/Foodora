@@ -37,7 +37,6 @@
 
 -(IBAction)switchAction:(id)sender
 {
-    NSLog(@"something");
     NSNumber *boolValue = [NSNumber numberWithBool:goingSwitch.on];
     user.isGoing = boolValue;
     

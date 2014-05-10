@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FoodViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
+@interface FoodViewController : UIViewController <UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate>
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *AddFoodButton;
+@property (weak, nonatomic) IBOutlet UITableView *myTable;
 
 @end
