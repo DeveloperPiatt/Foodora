@@ -18,6 +18,9 @@
     NSString *_getUser;
     
     NSMutableArray *_masterFoodList;
+    
+    NSMutableData *webData;
+    NSURLConnection *connection;
 }
 
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
@@ -41,6 +44,107 @@
     return self;
 }
 
+-(void)setupConnection
+{
+    //Idicates activity while table view loads data
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
+    //Initilizes NSURL object and and creates request
+    NSURL *url = [NSURL URLWithString:@"http://fishslice2000.appspot.com/users.jsp"];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    
+    //Loads url request and sends messages to delegate as the load progresses
+    connection = [NSURLConnection connectionWithRequest:request delegate:self];
+    
+    if(connection)
+    {
+        NSLog(@"connection true");
+        webData = [[NSMutableData alloc]init];
+    }
+    
+    
+}
+
+#pragma mark - Connection
+
+//Sent when the connection has received sufficient data to construct the URL response
+-(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
+{
+    //Resets webData on valid response
+    [webData setLength:0];
+}
+
+
+//Sets the recieved data to webData for use later. We are currently expecting it to receive JSON
+-(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+{
+    [webData appendData:data];
+    NSLog(@"SetData");
+}
+
+
+-(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{
+    NSLog(@"FailWithError");
+}
+
+-(void)connectionDidFinishLoading:(NSURLConnection *)connection
+{
+    NSLog(@"ConnectionFinishedLoading");
+    NSDictionary *allDataDictionary = [NSJSONSerialization JSONObjectWithData:webData options:0 error:nil];
+    for (NSDictionary *user in allDataDictionary)
+    {
+        
+        if (![[user objectForKey:@"username"] isKindOfClass:[NSNull class]]) {
+            NSLog(@"found a user -> %@", [user objectForKey:@"username"]);
+            [self createUser:user];
+        }
+        
+    }
+    
+    NSError *error = nil;
+    if([self.managedObjectContext hasChanges]) {
+        if(![self.managedObjectContext save:&error]) {
+            NSLog(@"Save Failed: %@", [error localizedDescription]);
+        } else {
+            NSLog(@"Save Succeeded");
+        }
+    }
+    
+    self.fetchedResultsController = nil;
+    
+    if (![[self fetchedResultsController]performFetch:&error]) {
+        NSLog(@"Error! %@", error);
+        abort();
+    }
+    
+    [myTableView reloadData];
+
+}
+
+-(void)createUser:(NSDictionary*)newUser
+{
+    
+    _getUser = [newUser objectForKey:@"username"];
+    
+    self.fetchedResultsControllerGetUser = nil;
+    
+    NSError *error = nil;
+    if (![[self fetchedResultsControllerGetUser]performFetch:&error]) {
+        NSLog(@"Error! %@", error);
+        abort();
+    }
+    
+    if ([[self.fetchedResultsControllerGetUser fetchedObjects] count] == 0) {
+        Users *user = [NSEntityDescription insertNewObjectForEntityForName:@"Users" inManagedObjectContext:[self managedObjectContext]];
+        
+        user.name = [newUser objectForKey:@"username"];
+        user.database_id = [NSString stringWithFormat:@"%@", [newUser objectForKey:@"id"]];
+    }
+    
+    
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -50,23 +154,25 @@
     _getUser = @"";
     [filterTextField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
     
+    
+    NSError *error;
+    if (![[self fetchedResultsController]performFetch:&error]) {
+        NSLog(@"Error! %@", error);
+        abort();
+    }
+    
     if (isAddFriend) {
         NSLog(@"TRUE!");
         [titleLabel setText:@"Add Friends"];
         [filterTextField setPlaceholder:@"Add friends ..."];
+        [self setupConnection];
     } else {
         NSLog(@"FALSE");
         [titleLabel setText:@"Add Food"];
         [filterTextField setPlaceholder:@"Add food ..."];
     }
     
-    NSError *error = nil;
     
-    if (![[self fetchedResultsController]performFetch:&error]) {
-        NSLog(@"Error! %@", error);
-        abort();
-    }
-
 }
 
 -(void)cancel:(id)sender
@@ -170,6 +276,13 @@
             }
         }
         
+        //Initilizes NSURL object and and creates request
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://fishslice2000.appspot.com/new_friend.jsp?user_id=%@&friend_id=%@", thisUser.database_id, userToAdd.database_id]];
+        NSURLRequest *request = [NSURLRequest requestWithURL:url];
+        
+        //Loads url request and sends messages to delegate as the load progresses
+        connection = [NSURLConnection connectionWithRequest:request delegate:self];
+        
     }
 }
 
@@ -221,7 +334,7 @@
     
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"name" ascending:YES];
     NSLog(@"name LIKE[cd] '*%@*'", _friendFilter);
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name LIKE[cd] %@",
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(name LIKE[cd] %@) AND (name <> 'Nick Piatt')",
                               [NSString stringWithFormat:@"*%@*", _friendFilter]];
     [fetchRequest setPredicate:predicate];
     
@@ -280,7 +393,7 @@
     [fetchRequest setEntity:entity];
     
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"name" ascending:YES];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = 'kFrog'"];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = 'Nick Piatt'"];
     [fetchRequest setPredicate:predicate];
     
     NSArray *sortDescriptors = [[NSArray alloc]initWithObjects:sortDescriptor, nil];
@@ -292,53 +405,6 @@
     _fetchedResultsControllerThisUser.delegate = self;
     
     return _fetchedResultsControllerThisUser;
-}
-
-#pragma mark - Fetched Results Controller Delegates
-
-- (void) controllerWillChangeContent:(NSFetchedResultsController *)controller {
-    [myTableView beginUpdates];
-}
-
-- (void) controllerDidChangeContent:(NSFetchedResultsController *)controller {
-    [myTableView endUpdates];
-}
-
-- (void) controller:(NSFetchedResultsController *)controller didChangeObject:(id)anObject atIndexPath:(NSIndexPath *)indexPath forChangeType:(NSFetchedResultsChangeType)type newIndexPath:(NSIndexPath *)newIndexPath {
-    
-    UITableView *tableView = myTableView; // temp placeholder
-    
-    switch (type) {
-        case NSFetchedResultsChangeInsert:
-            [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationFade];
-            break;
-        case NSFetchedResultsChangeDelete:
-            [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-            break;
-        case NSFetchedResultsChangeUpdate: {
-            Users *changeUser = [self.fetchedResultsController objectAtIndexPath:indexPath];
-            UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-            cell.textLabel.text = changeUser.name;
-        }
-            break;
-        case NSFetchedResultsChangeMove:
-            [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-            [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationFade];
-            break;
-    }
-}
-
-- (void) controller:(NSFetchedResultsController *)controller didChangeSection:(id<NSFetchedResultsSectionInfo>)sectionInfo atIndex:(NSUInteger)sectionIndex forChangeType:(NSFetchedResultsChangeType)type {
-    
-    UITableView *tableView = myTableView; // temp placeholder
-    
-    switch (type) {
-        case NSFetchedResultsChangeInsert:
-            [tableView insertSections:[NSIndexSet indexSetWithIndex:sectionIndex] withRowAnimation:UITableViewRowAnimationFade];
-            break;
-        case NSFetchedResultsChangeDelete:
-            [tableView deleteSections:[NSIndexSet indexSetWithIndex:sectionIndex] withRowAnimation:UITableViewRowAnimationFade];
-    }
 }
 
 

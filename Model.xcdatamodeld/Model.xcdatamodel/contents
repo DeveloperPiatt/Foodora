@@ -10,6 +10,7 @@
         <relationship name="opinions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Opinions" inverseName="restaurant" inverseEntity="Opinions" syncable="YES"/>
     </entity>
     <entity name="Users" representedClassName="Users" syncable="YES">
+        <attribute name="database_id" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="isGoing" optional="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="friends" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Users" inverseName="friends" inverseEntity="Users" syncable="YES"/>
@@ -18,6 +19,6 @@
     <elements>
         <element name="Opinions" positionX="7" positionY="54" width="128" height="88"/>
         <element name="Restaurants" positionX="-20" positionY="215" width="128" height="73"/>
-        <element name="Users" positionX="-173" positionY="-61" width="128" height="103"/>
+        <element name="Users" positionX="-173" positionY="-61" width="128" height="118"/>
     </elements>
 </model>

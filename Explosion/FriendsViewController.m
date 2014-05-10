@@ -42,7 +42,7 @@
         abort();
     }
     
-    [self setupDummyData];
+    //[self setupDummyData];
     
     
     self.fetchedResultsController = nil;
@@ -197,7 +197,7 @@
     
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"name" ascending:YES];
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = 'kFrog'"];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = 'Nick Piatt'"];
     
     [fetchRequest setPredicate:predicate];
     
@@ -213,32 +213,18 @@
 }
 -(void)viewWillAppear:(BOOL)animated
 {
+    self.fetchedResultsController = nil;
+    NSError *error;
+    if (![[self fetchedResultsController]performFetch:&error]) {
+        NSLog(@"Error! %@", error);
+        abort();
+    }
     [myTableView reloadData];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 
 {
-    
-    
-    
-    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-    
-    
-    
-    
-    
-    UIAlertView *message = [[UIAlertView alloc] initWithTitle:cell.textLabel.text
-                            
-                                                      message:@"Rate this restaurant!"
-                            
-                                                     delegate:nil
-                            
-                                            cancelButtonTitle:@"Nevermind"
-                            
-                                            otherButtonTitles:@"Like", @"Meh", @"Dislike", nil];
-    
-    [message show];
     
 }
 

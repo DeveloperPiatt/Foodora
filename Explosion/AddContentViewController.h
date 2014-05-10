@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AddContentViewController : UIViewController <NSFetchedResultsControllerDelegate, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
+@interface AddContentViewController : UIViewController <NSFetchedResultsControllerDelegate, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, NSURLConnectionDataDelegate>
 
 @property BOOL isAddFriend;
 

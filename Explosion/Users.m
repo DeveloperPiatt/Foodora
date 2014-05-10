@@ -15,6 +15,7 @@
 
 @dynamic name;
 @dynamic isGoing;
+@dynamic database_id;
 @dynamic friends;
 @dynamic opinions;
 

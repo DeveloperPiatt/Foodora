@@ -15,6 +15,7 @@
 
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic, retain) NSNumber * isGoing;
+@property (nonatomic, retain) NSString * database_id;
 @property (nonatomic, retain) NSSet *friends;
 @property (nonatomic, retain) NSSet *opinions;
 @end
