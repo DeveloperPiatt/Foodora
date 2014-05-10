@@ -9,7 +9,9 @@
 #import "FoodViewController.h"
 #import "AddContentViewController.h"
 
-@interface FoodViewController ()
+@interface FoodViewController () {
+    AppDelegate *aDelegate;
+}
 
 @end
 
@@ -28,6 +30,8 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    aDelegate = DELEGATE;
+    NSLog(@"%@ is logged in!", aDelegate.userLogin);
 }
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender

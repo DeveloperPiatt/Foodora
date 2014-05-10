@@ -30,6 +30,9 @@
         
         _sizeMod = self.size.height-24;
         
+        AppDelegate *aDelegate = DELEGATE;
+        aDelegate.userLogin = @"Nick Piatt";
+        
         [self setupUI];
     }
     return self;
