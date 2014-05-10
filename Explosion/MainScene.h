@@ -8,6 +8,6 @@
 
 #import <SpriteKit/SpriteKit.h>
 
-@interface MainScene : SKScene
+@interface MainScene : SKScene <NSFetchedResultsControllerDelegate>
 
 @end

@@ -7,6 +7,23 @@
 //
 
 #import "mainScene.h"
+#import "Users.h"
+#import "Restaurants.h"
+#import "Opinions.h"
+
+@interface MainScene () {
+    AppDelegate *aDelegate;
+    Users *_user;
+    NSNumber *_likeValue;
+    
+    NSSet *testSet;
+}
+
+@property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerOpinions;
+@property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerGetUser;
+
+@end
 
 @implementation MainScene
 {
@@ -30,12 +47,34 @@
         
         _sizeMod = self.size.height-24;
         
-        AppDelegate *aDelegate = DELEGATE;
+        aDelegate = DELEGATE;
         aDelegate.userLogin = @"Nick Piatt";
         
+       
+        
+        NSError *error;
+        if (![[self fetchedResultsControllerGetUser]performFetch:&error]) {
+            NSLog(@"Error! %@", error);
+            abort();
+        }
+        
+        
+        if ([self.fetchedResultsControllerGetUser fetchedObjects] > 0) {
+            NSLog(@"captured logged in user");
+            _user = [[self.fetchedResultsControllerGetUser fetchedObjects]objectAtIndex:0];
+        }
+         
+        
         [self setupUI];
+        
+        
     }
     return self;
+}
+
+-(void)setupLogin
+{
+    
 }
 
 -(void)optionBoxSelected:(SKSpriteNode*)oBox
@@ -108,6 +147,106 @@
     
 }
 
+-(NSString*)getDecisionFor:(NSString*)decisionType
+{
+    
+    NSMutableString *theDecision = [[NSMutableString alloc] initWithString:@"Going to "];
+    
+    
+    
+    NSMutableArray *validRestaurants = [NSMutableArray new];
+    NSMutableArray *bannedRestaurants = [NSMutableArray new];
+    
+    NSSet *friendArray = _user.friends;
+    
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"name" ascending:YES];
+    NSArray *sortDescriptors = [[NSArray alloc]initWithObjects:sortDescriptor, nil];
+    NSMutableArray *test = [NSMutableArray arrayWithArray:[_user.friends sortedArrayUsingDescriptors:sortDescriptors]];
+    
+    
+    NSMutableArray *peopleGoing = [NSMutableArray new];
+    [peopleGoing addObject:_user];
+    
+    for (Users *user in test) {
+        if ([user.isGoing boolValue]) {
+            [peopleGoing addObject:user];
+        }
+    }
+    
+    testSet = [NSSet setWithArray:peopleGoing];
+    
+    NSError *error;
+    
+    self.fetchedResultsControllerOpinions = nil;
+    
+    if (![[self fetchedResultsControllerOpinions]performFetch:&error]) {
+        NSLog(@"Error! %@", error);
+        abort();
+    }
+    NSArray *allOpinions = [self.fetchedResultsControllerOpinions fetchedObjects];
+    
+    if ([self.fetchedResultsControllerOpinions fetchedObjects] > 0) {
+        
+    
+        if ([decisionType isEqualToString:@"playSprite"]) {
+            
+            
+            
+            for (Opinions *opinion in allOpinions) {
+                NSLog(@"%@ - %@", opinion.user.name, opinion.restaurant.name);
+                if ([opinion.like intValue] >= 0) {
+                    if (![bannedRestaurants containsObject:opinion.restaurant.name]) {
+                        [validRestaurants addObject:opinion.restaurant.name];
+                    }
+                } else {
+                    [validRestaurants removeObject:opinion.restaurant.name];
+                    [bannedRestaurants addObject:opinion.restaurant.name];
+                }
+            }
+        }
+        
+        if ([decisionType isEqualToString:@"safeSprite"]) {
+            for (Opinions *opinion in allOpinions) {
+                NSLog(@"%@ - %@", opinion.user.name, opinion.restaurant.name);
+                if ([opinion.like intValue] >= 1) {
+                    if (![bannedRestaurants containsObject:opinion.restaurant.name]) {
+                        [validRestaurants addObject:opinion.restaurant.name];
+                    }
+                } else {
+                    [validRestaurants removeObject:opinion.restaurant.name];
+                    [bannedRestaurants addObject:opinion.restaurant.name];
+                }
+            }
+        }
+        
+        if ([decisionType isEqualToString:@"dangerSprite"]) {
+            for (Opinions *opinion in allOpinions) {
+                NSLog(@"%@ - %@", opinion.user.name, opinion.restaurant.name);
+                if ([opinion.like intValue] >= -1) {
+                    if (![bannedRestaurants containsObject:opinion.restaurant.name]) {
+                        [validRestaurants addObject:opinion.restaurant.name];
+                    }
+                } else {
+                    [validRestaurants removeObject:opinion.restaurant.name];
+                    [bannedRestaurants addObject:opinion.restaurant.name];
+                }
+            }
+        }
+        
+    }
+    
+    NSLog(@"Valid options - %@", validRestaurants);
+    if (validRestaurants.count > 0) {
+        int randomValue =arc4random() % validRestaurants.count;
+        [theDecision appendString:[validRestaurants objectAtIndex:randomValue]];
+    } else {
+        [theDecision setString:@"Not enough matches"];
+    }
+   
+    
+    return [NSString stringWithFormat:@"%@", theDecision];
+}
+
 -(void)spawnDecisionAtNode:(SKSpriteNode*)node
 {    
     BOOL addToView = FALSE;
@@ -116,7 +255,9 @@
         addToView = TRUE;
     }
     
-    _decisionLabel.text = [NSString stringWithFormat:@"A %@ decision!", node.name];
+//    [self getDecisionFor:node.name];
+    
+    _decisionLabel.text = [NSString stringWithFormat:@"%@!", [self getDecisionFor:node.name]];
     // TODO:
     _decisionLabel.fontSize = 1;
     _decisionLabel.position = node.position;
@@ -169,6 +310,67 @@
     if ([optionsArray containsObject:nodeName]) {
         [self spawnDecisionAtNode:touchedNode];
     }
+}
+
+#pragma mark - Fetched Stuff
+-(NSFetchedResultsController*) fetchedResultsControllerGetUser {
+    NSLog(@"user = %@", aDelegate.userLogin);
+    if (_fetchedResultsControllerGetUser != nil) {
+        return _fetchedResultsControllerGetUser;
+    }
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc]init];
+    NSManagedObjectContext *context = [self managedObjectContext];
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Users" inManagedObjectContext:context];
+    
+    [fetchRequest setEntity:entity];
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"name" ascending:YES];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = %@", aDelegate.userLogin];
+    [fetchRequest setPredicate:predicate];
+    
+    NSArray *sortDescriptors = [[NSArray alloc]initWithObjects:sortDescriptor, nil];
+    
+    fetchRequest.sortDescriptors = sortDescriptors;
+    
+    _fetchedResultsControllerGetUser = [[NSFetchedResultsController alloc]initWithFetchRequest:fetchRequest managedObjectContext:context sectionNameKeyPath:nil cacheName:nil];
+    
+    _fetchedResultsControllerGetUser.delegate = self;
+    
+    return _fetchedResultsControllerGetUser;
+}
+
+-(NSFetchedResultsController*) fetchedResultsControllerOpinions {
+    if (_fetchedResultsControllerOpinions != nil) {
+        return _fetchedResultsControllerOpinions;
+    }
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc]init];
+    NSManagedObjectContext *context = [self managedObjectContext];
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Opinions" inManagedObjectContext:context];
+    
+    [fetchRequest setEntity:entity];
+    
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"like" ascending:YES];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"user IN %@", testSet];
+    
+    [fetchRequest setPredicate:predicate];
+    
+    NSArray *sortDescriptors = [[NSArray alloc]initWithObjects:sortDescriptor, nil];
+    
+    fetchRequest.sortDescriptors = sortDescriptors;
+    
+    _fetchedResultsControllerOpinions = [[NSFetchedResultsController alloc]initWithFetchRequest:fetchRequest managedObjectContext:context sectionNameKeyPath:nil cacheName:nil];
+    
+    _fetchedResultsControllerOpinions.delegate = self;
+    
+    return _fetchedResultsControllerOpinions;
+}
+
+-(NSManagedObjectContext*)managedObjectContext {
+    return [(AppDelegate*)[[UIApplication sharedApplication]delegate]managedObjectContext];
 }
 
 @end
