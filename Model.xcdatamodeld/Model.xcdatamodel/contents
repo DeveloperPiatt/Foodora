@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13C1021" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Opinions" representedClassName="Opinions" syncable="YES">
+        <attribute name="like" optional="YES" attributeType="Integer 16" minValueString="-1" maxValueString="1" defaultValueString="0" syncable="YES"/>
+        <relationship name="restaurant" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Restaurants" inverseName="opinions" inverseEntity="Restaurants" syncable="YES"/>
+        <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Users" inverseName="opinions" inverseEntity="Users" syncable="YES"/>
+    </entity>
+    <entity name="Restaurants" representedClassName="Restaurants" syncable="YES">
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="opinions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Opinions" inverseName="restaurant" inverseEntity="Opinions" syncable="YES"/>
+    </entity>
+    <entity name="Users" representedClassName="Users" syncable="YES">
+        <attribute name="isGoing" optional="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="friends" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Users" inverseName="friends" inverseEntity="Users" syncable="YES"/>
+        <relationship name="opinions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Opinions" inverseName="user" inverseEntity="Opinions" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Opinions" positionX="7" positionY="54" width="128" height="88"/>
+        <element name="Restaurants" positionX="-20" positionY="215" width="128" height="73"/>
+        <element name="Users" positionX="-173" positionY="-61" width="128" height="103"/>
+    </elements>
+</model>
