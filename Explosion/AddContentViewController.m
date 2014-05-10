@@ -44,7 +44,7 @@
     return self;
 }
 
--(void)setupConnection
+-(void)setupFriendConnection
 {
     //Idicates activity while table view loads data
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
@@ -90,35 +90,38 @@
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    NSLog(@"ConnectionFinishedLoading");
-    NSDictionary *allDataDictionary = [NSJSONSerialization JSONObjectWithData:webData options:0 error:nil];
-    for (NSDictionary *user in allDataDictionary)
-    {
-        
-        if (![[user objectForKey:@"username"] isKindOfClass:[NSNull class]]) {
-            NSLog(@"found a user -> %@", [user objectForKey:@"username"]);
-            [self createUser:user];
+    if (isAddFriend) {
+        NSLog(@"ConnectionFinishedLoading");
+        NSDictionary *allDataDictionary = [NSJSONSerialization JSONObjectWithData:webData options:0 error:nil];
+        for (NSDictionary *user in allDataDictionary)
+        {
+            
+            if (![[user objectForKey:@"username"] isKindOfClass:[NSNull class]]) {
+                NSLog(@"found a user -> %@", [user objectForKey:@"username"]);
+                [self createUser:user];
+            }
+            
         }
         
-    }
-    
-    NSError *error = nil;
-    if([self.managedObjectContext hasChanges]) {
-        if(![self.managedObjectContext save:&error]) {
-            NSLog(@"Save Failed: %@", [error localizedDescription]);
-        } else {
-            NSLog(@"Save Succeeded");
+        NSError *error = nil;
+        if([self.managedObjectContext hasChanges]) {
+            if(![self.managedObjectContext save:&error]) {
+                NSLog(@"Save Failed: %@", [error localizedDescription]);
+            } else {
+                NSLog(@"Save Succeeded");
+            }
         }
+        
+        self.fetchedResultsController = nil;
+        
+        if (![[self fetchedResultsController]performFetch:&error]) {
+            NSLog(@"Error! %@", error);
+            abort();
+        }
+        
+        [myTableView reloadData];
     }
     
-    self.fetchedResultsController = nil;
-    
-    if (![[self fetchedResultsController]performFetch:&error]) {
-        NSLog(@"Error! %@", error);
-        abort();
-    }
-    
-    [myTableView reloadData];
 
 }
 
@@ -165,7 +168,7 @@
         NSLog(@"TRUE!");
         [titleLabel setText:@"Add Friends"];
         [filterTextField setPlaceholder:@"Add friends ..."];
-        [self setupConnection];
+        [self setupFriendConnection];
     } else {
         NSLog(@"FALSE");
         [titleLabel setText:@"Add Food"];
@@ -180,26 +183,16 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void)setupFriends
-{
-    
-    [myTableView reloadData];
-}
-
 #pragma mark - Table
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-//    Users *fetchedUser = [[self.fetchedResultsController fetchedObjects] objectAtIndex:0];
-//    
-//    NSLog(@"testing %d", [fetchedUser.friends count]);
-//    return [fetchedUser.friends count];
 
+    if (isAddFriend) {
+        return [[self.fetchedResultsController fetchedObjects] count];
+    }
     
-    return [[self.fetchedResultsController fetchedObjects] count];
-    
-    //    return [sectionInfo numberOfObjects];
-    //    return [returnedUser.friends count];
+    return 0;
 }
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -212,12 +205,10 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
     // Configure the cell...
-    
-    Users *users = [self.fetchedResultsController objectAtIndexPath:indexPath];
-    
-    
-    cell.textLabel.text = users.name;
-    //    cell.detailTextLabel.text = prescription.instructions;
+    if (isAddFriend) {
+        Users *users = [self.fetchedResultsController objectAtIndexPath:indexPath];
+        cell.textLabel.text = users.name;
+    }
     
     return cell;
 }
@@ -240,50 +231,54 @@
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (buttonIndex == 0) {
-        // cancel selected
-        _getUser = @"";
-    } else {
-
-        self.fetchedResultsControllerGetUser = nil;
-        
-        NSError *error = nil;
-        
-        if (![[self fetchedResultsControllerGetUser]performFetch:&error]) {
-            NSLog(@"Error! %@", error);
-            abort();
-        }
-        if (![[self fetchedResultsControllerThisUser]performFetch:&error]) {
-            NSLog(@"Error! %@", error);
-            abort();
-        }
-        
-        NSLog(@"friend -> %d", [[self.fetchedResultsControllerGetUser fetchedObjects]count]);
-        Users *userToAdd = [[self.fetchedResultsControllerGetUser fetchedObjects] objectAtIndex:0];
-        NSLog(@"me -> %d", [[self.fetchedResultsControllerThisUser fetchedObjects]count]);
-        Users *thisUser = [[self.fetchedResultsControllerThisUser fetchedObjects] objectAtIndex:0];
-        
-        NSMutableSet *newFriendSet = [NSMutableSet setWithSet:thisUser.friends];
-        [newFriendSet addObject:userToAdd];
-        
-        thisUser.friends = newFriendSet;
-        
-        if([self.managedObjectContext hasChanges]) {
-            if(![self.managedObjectContext save:&error]) {
-                NSLog(@"Save Failed: %@", [error localizedDescription]);
-            } else {
-                NSLog(@"Save Succeeded");
+    
+    if (isAddFriend) {
+        if (buttonIndex == 0) {
+            // cancel selected
+            _getUser = @"";
+        } else {
+            
+            self.fetchedResultsControllerGetUser = nil;
+            
+            NSError *error = nil;
+            
+            if (![[self fetchedResultsControllerGetUser]performFetch:&error]) {
+                NSLog(@"Error! %@", error);
+                abort();
             }
+            if (![[self fetchedResultsControllerThisUser]performFetch:&error]) {
+                NSLog(@"Error! %@", error);
+                abort();
+            }
+            
+            NSLog(@"friend -> %d", [[self.fetchedResultsControllerGetUser fetchedObjects]count]);
+            Users *userToAdd = [[self.fetchedResultsControllerGetUser fetchedObjects] objectAtIndex:0];
+            NSLog(@"me -> %d", [[self.fetchedResultsControllerThisUser fetchedObjects]count]);
+            Users *thisUser = [[self.fetchedResultsControllerThisUser fetchedObjects] objectAtIndex:0];
+            
+            NSMutableSet *newFriendSet = [NSMutableSet setWithSet:thisUser.friends];
+            [newFriendSet addObject:userToAdd];
+            
+            thisUser.friends = newFriendSet;
+            
+            if([self.managedObjectContext hasChanges]) {
+                if(![self.managedObjectContext save:&error]) {
+                    NSLog(@"Save Failed: %@", [error localizedDescription]);
+                } else {
+                    NSLog(@"Save Succeeded");
+                }
+            }
+            
+            //Initilizes NSURL object and and creates request
+            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://fishslice2000.appspot.com/new_friend.jsp?user_id=%@&friend_id=%@", thisUser.database_id, userToAdd.database_id]];
+            NSURLRequest *request = [NSURLRequest requestWithURL:url];
+            
+            //Loads url request and sends messages to delegate as the load progresses
+            connection = [NSURLConnection connectionWithRequest:request delegate:self];
+            
         }
-        
-        //Initilizes NSURL object and and creates request
-        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://fishslice2000.appspot.com/new_friend.jsp?user_id=%@&friend_id=%@", thisUser.database_id, userToAdd.database_id]];
-        NSURLRequest *request = [NSURLRequest requestWithURL:url];
-        
-        //Loads url request and sends messages to delegate as the load progresses
-        connection = [NSURLConnection connectionWithRequest:request delegate:self];
-        
     }
+    
 }
 
 #pragma mark - Data Stuff
@@ -319,8 +314,6 @@
 }
 
 -(NSFetchedResultsController*) fetchedResultsController {
-    
-//    NSLog(@"testing");
     if (_fetchedResultsController != nil) {
         return _fetchedResultsController;
     }
@@ -351,7 +344,6 @@
 
 -(NSFetchedResultsController*) fetchedResultsControllerGetUser {
     
-    //    NSLog(@"testing");
     if (_fetchedResultsControllerGetUser != nil) {
         return _fetchedResultsControllerGetUser;
     }
@@ -380,7 +372,6 @@
 
 -(NSFetchedResultsController*) fetchedResultsControllerThisUser {
     
-    //    NSLog(@"testing");
     if (_fetchedResultsControllerThisUser != nil) {
         return _fetchedResultsControllerThisUser;
     }
@@ -411,9 +402,6 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     if (textField == filterTextField) {
         [textField resignFirstResponder];
-        
-        
-        
         return NO;
     }
     return YES;
@@ -421,22 +409,24 @@
 
 -(void)textFieldDidChange:(UITextField*)textField
 {
-    
-    _friendFilter = textField.text;
-    NSLog(@"%@", _friendFilter);
-    
-    
-    self.fetchedResultsController = nil;
-    
-    
-    NSError *error = nil;
-    
-    if (![[self fetchedResultsController]performFetch:&error]) {
-        NSLog(@"Error! %@", error);
-        abort();
+    if (isAddFriend) {
+        _friendFilter = textField.text;
+        NSLog(@"%@", _friendFilter);
+        
+        
+        self.fetchedResultsController = nil;
+        
+        
+        NSError *error = nil;
+        
+        if (![[self fetchedResultsController]performFetch:&error]) {
+            NSLog(@"Error! %@", error);
+            abort();
+        }
+        
+        [myTableView reloadData];
     }
     
-    [myTableView reloadData];
 }
 
 
