@@ -8,6 +8,7 @@
 
 #import "AddContentViewController.h"
 #import "Users.h"
+#import "Opinions.h"
 #import "Restaurants.h"
 #import "AppDelegate.h"
 
@@ -16,11 +17,14 @@
     NSMutableArray *_masterFriendsList;
     NSString *_friendFilter;
     
-    
+    AppDelegate *aDelegate;
     
     
     NSString *_getUser;
     NSString *_getRestaurant;
+    
+    Users *_opUser;
+    Restaurants *_opRestaurant;
     
     NSMutableArray *_masterFoodList;
     
@@ -33,6 +37,8 @@
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerFood;
 
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerGetRestaurant;
+
+@property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerGetOpinion;
 
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerGetUser;
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerThisUser;
@@ -60,6 +66,9 @@
     _friendFilter = @"";
     _getUser = @"";
     _getRestaurant = @"";
+    
+    aDelegate = DELEGATE;
+    
     [filterTextField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
     
     
@@ -309,6 +318,15 @@
         [message show];
         
         _getUser = cell.textLabel.text;
+    } else {
+        UIAlertView *message = [[UIAlertView alloc] initWithTitle:@"Add Restaurant"
+                                                          message:[NSString stringWithFormat:@"Add %@?", cell.textLabel.text]
+                                                         delegate:self
+                                                cancelButtonTitle:@"No"
+                                                otherButtonTitles:@"Yes", nil];
+        [message show];
+        
+        _getRestaurant = cell.textLabel.text;
     }
     
 }
@@ -361,6 +379,68 @@
             connection = [NSURLConnection connectionWithRequest:request delegate:self];
             
         }
+    } else {
+        if (buttonIndex == 0) {
+            // cancel selected
+            _getRestaurant = @"";
+        } else {
+        
+            self.fetchedResultsControllerGetRestaurant = nil;
+            
+            
+            
+            NSError *error = nil;
+            
+            if (![[self fetchedResultsControllerGetRestaurant]performFetch:&error]) {
+                NSLog(@"Error! %@", error);
+                abort();
+            }
+            if (![[self fetchedResultsControllerThisUser]performFetch:&error]) {
+                NSLog(@"Error! %@", error);
+                abort();
+            }
+            
+            NSLog(@"restaurant -> %d", [[self.fetchedResultsControllerGetRestaurant fetchedObjects]count]);
+            _opRestaurant = [[self.fetchedResultsControllerGetRestaurant fetchedObjects] objectAtIndex:0];
+            NSLog(@"me -> %d", [[self.fetchedResultsControllerThisUser fetchedObjects]count]);
+            _opUser = [[self.fetchedResultsControllerThisUser fetchedObjects] objectAtIndex:0];
+            
+            
+            self.fetchedResultsControllerGetOpinion = nil;
+            
+            if (![[self fetchedResultsControllerGetOpinion]performFetch:&error]) {
+                NSLog(@"Error! %@", error);
+                abort();
+            }
+            
+            if ([[self.fetchedResultsControllerGetOpinion fetchedObjects]count] == 0) {
+                NSLog(@"No opinion with this user/restaurant combo yet");
+                
+                Opinions *newOpinion = [NSEntityDescription insertNewObjectForEntityForName:@"Opinions" inManagedObjectContext:[self managedObjectContext]];
+                
+                newOpinion.user = _opUser;
+                newOpinion.restaurant = _opRestaurant;
+                
+                if([self.managedObjectContext hasChanges]) {
+                    if(![self.managedObjectContext save:&error]) {
+                        NSLog(@"Save Failed: %@", [error localizedDescription]);
+                    } else {
+                        NSLog(@"Save Succeeded");
+                    }
+                }
+                
+//                //Initilizes NSURL object and and creates request
+//                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://fishslice2000.appspot.com/new_opinion.jsp?user_id=%@&friend_id=%@", _opUser.database_id, _opRestaurant.database_id]];
+//                NSURLRequest *request = [NSURLRequest requestWithURL:url];
+//                
+//                //Loads url request and sends messages to delegate as the load progresses
+//                connection = [NSURLConnection connectionWithRequest:request delegate:self];
+                
+            }
+            
+            
+            
+        }
     }
     
 }
@@ -396,7 +476,8 @@
     
     return _fetchedResultsControllerFood;
 }
--(NSFetchedResultsController*) fetchedResultsControllerGetRestaurant {
+-(NSFetchedResultsController*) fetchedResultsControllerGetRestaurant
+{
     if (_fetchedResultsControllerGetRestaurant != nil) {
         return _fetchedResultsControllerGetRestaurant;
     }
@@ -423,6 +504,34 @@
     
     return _fetchedResultsControllerGetRestaurant;
     
+}
+
+-(NSFetchedResultsController*) fetchedResultsControllerGetOpinion
+{
+    if (_fetchedResultsControllerGetOpinion != nil) {
+        return _fetchedResultsControllerGetOpinion;
+    }
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc]init];
+    NSManagedObjectContext *context = [self managedObjectContext];
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Opinions" inManagedObjectContext:context];
+    
+    [fetchRequest setEntity:entity];
+    
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"like" ascending:YES];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(restaurant = %@) AND (user = %@)", _opRestaurant, _opUser];
+    [fetchRequest setPredicate:predicate];
+    
+    NSArray *sortDescriptors = [[NSArray alloc]initWithObjects:sortDescriptor, nil];
+    
+    fetchRequest.sortDescriptors = sortDescriptors;
+    
+    _fetchedResultsControllerGetOpinion = [[NSFetchedResultsController alloc]initWithFetchRequest:fetchRequest managedObjectContext:context sectionNameKeyPath:nil cacheName:nil];
+    
+    _fetchedResultsControllerGetOpinion.delegate = self;
+    
+    return _fetchedResultsControllerGetOpinion;
 }
 -(NSFetchedResultsController*) fetchedResultsController {
     if (_fetchedResultsController != nil) {
@@ -495,7 +604,7 @@
     [fetchRequest setEntity:entity];
     
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"name" ascending:YES];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = 'Nick Piatt'"];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = %@", aDelegate.userLogin];
     [fetchRequest setPredicate:predicate];
     
     NSArray *sortDescriptors = [[NSArray alloc]initWithObjects:sortDescriptor, nil];
