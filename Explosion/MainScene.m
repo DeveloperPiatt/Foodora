@@ -16,7 +16,12 @@
     Users *_user;
     NSNumber *_likeValue;
     
+    UITextField *login;
+    
     NSSet *testSet;
+    
+    NSMutableData *webData;
+    NSURLConnection *connection;
 }
 
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
@@ -35,6 +40,8 @@
     
     SKLabelNode *_decisionLabel;
     
+    SKLabelNode *_loginLabel;
+    
     SKSpriteNode *_resetSprite;
     
     int _sizeMod;
@@ -48,33 +55,147 @@
         _sizeMod = self.size.height-24;
         
         aDelegate = DELEGATE;
-        aDelegate.userLogin = @"Nick Piatt";
+//        aDelegate.userLogin = @"Nick Piatt";
+//        
+//       
+//        
+//        NSError *error;
+//        if (![[self fetchedResultsControllerGetUser]performFetch:&error]) {
+//            NSLog(@"Error! %@", error);
+//            abort();
+//        }
+//        
+//        
+//        if ([self.fetchedResultsControllerGetUser fetchedObjects] > 0) {
+//            NSLog(@"captured logged in user");
+//            _user = [[self.fetchedResultsControllerGetUser fetchedObjects]objectAtIndex:0];
+//        }
+//
+//        
+//        [self setupUI];
         
-       
-        
-        NSError *error;
-        if (![[self fetchedResultsControllerGetUser]performFetch:&error]) {
-            NSLog(@"Error! %@", error);
-            abort();
-        }
-        
-        
-        if ([self.fetchedResultsControllerGetUser fetchedObjects] > 0) {
-            NSLog(@"captured logged in user");
-            _user = [[self.fetchedResultsControllerGetUser fetchedObjects]objectAtIndex:0];
-        }
-         
-        
-        [self setupUI];
+        [self setupLogin];
         
         
     }
     return self;
 }
 
+-(void)didMoveToView:(SKView *)view {
+    
+    
+    login = [[UITextField alloc] initWithFrame:CGRectMake(self.size.width/2 - 100, 360, 200, 40)];
+    login.borderStyle = UITextBorderStyleRoundedRect;
+    login.textColor = [UIColor blackColor];
+    login.font = [UIFont systemFontOfSize:17.0];
+    login.placeholder = @"Enter your name here";
+    login.backgroundColor = [UIColor whiteColor];
+    login.autocorrectionType = UITextAutocorrectionTypeYes;
+    login.keyboardType = UIKeyboardTypeDefault;
+    login.clearButtonMode = UITextFieldViewModeWhileEditing;
+    login.delegate = self;
+    [self.view addSubview:login];
+}
+
 -(void)setupLogin
 {
     
+    _bgSprite = [SKSpriteNode spriteNodeWithImageNamed:@"foodora_quicksketch.jpg"];
+    _bgSprite.size = CGSizeMake(320, 312);
+    _bgSprite.anchorPoint = CGPointZero;
+    _bgSprite.position = CGPointMake(0, _sizeMod-_bgSprite.size.height);
+    _bgSprite.name = @"bgSprite";
+    
+    [self addChild:_bgSprite];
+    
+    _loginLabel = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
+    _loginLabel.text = [NSString stringWithFormat:@"Type your Username!"];
+    _loginLabel.fontSize = 16;
+    _loginLabel.position = CGPointMake(self.size.width/2, _sizeMod - 340);
+    
+    [self addChild:_loginLabel];
+}
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    CGPoint OC = self.view.center;
+    self.view.center = CGPointMake(OC.x, OC.y-150);
+}
+
+-(BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    CGPoint OC = self.view.center;
+    self.view.center = CGPointMake(OC.x, OC.y+150);
+    
+    //Initilizes NSURL object and and creates request
+    NSURL *url = [NSURL URLWithString:@"http://fishslice2000.appspot.com/users.jsp"];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    
+    //Loads url request and sends messages to delegate as the load progresses
+    connection = [NSURLConnection connectionWithRequest:request delegate:self];
+    
+    if(connection)
+    {
+        NSLog(@"connection true");
+        webData = [[NSMutableData alloc]init];
+    }
+    
+    
+    return YES;
+}
+
+//Sent when the connection has received sufficient data to construct the URL response
+-(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
+{
+    //Resets webData on valid response
+    [webData setLength:0];
+}
+
+
+//Sets the recieved data to webData for use later. We are currently expecting it to receive JSON
+-(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+{
+    [webData appendData:data];
+    NSLog(@"SetData");
+}
+
+
+-(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{
+    NSLog(@"FailWithError");
+}
+
+-(void)connectionDidFinishLoading:(NSURLConnection *)connection
+{
+        NSLog(@"ConnectionFinishedLoading");
+        NSDictionary *allDataDictionary = [NSJSONSerialization JSONObjectWithData:webData options:0 error:nil];
+        for (NSDictionary *user in allDataDictionary)
+        {
+            
+            if ([login.text isEqualToString:[user objectForKey:@"username"]]) {
+                NSLog(@"SUCCESS");
+                aDelegate.userLogin = login.text;
+                
+                
+                NSError *error;
+                if (![[self fetchedResultsControllerGetUser]performFetch:&error]) {
+                    NSLog(@"Error! %@", error);
+                    abort();
+                }
+                
+                
+                if ([self.fetchedResultsControllerGetUser fetchedObjects] > 0) {
+                    NSLog(@"captured logged in user");
+                    _user = [[self.fetchedResultsControllerGetUser fetchedObjects]objectAtIndex:0];
+                }
+
+                [login removeFromSuperview];
+                [_loginLabel removeFromParent];
+                [self setupUI];
+            }
+            
+        }
 }
 
 -(void)optionBoxSelected:(SKSpriteNode*)oBox
@@ -107,13 +228,13 @@
 {
 //    int sizeMod = self.size.height-24;
     
-    _bgSprite = [SKSpriteNode spriteNodeWithImageNamed:@"foodora_quicksketch.jpg"];
-    _bgSprite.size = CGSizeMake(320, 312);
-    _bgSprite.anchorPoint = CGPointZero;
-    _bgSprite.position = CGPointMake(0, _sizeMod-_bgSprite.size.height);
-    _bgSprite.name = @"bgSprite";
-    
-    [self addChild:_bgSprite];
+//    _bgSprite = [SKSpriteNode spriteNodeWithImageNamed:@"foodora_quicksketch.jpg"];
+//    _bgSprite.size = CGSizeMake(320, 312);
+//    _bgSprite.anchorPoint = CGPointZero;
+//    _bgSprite.position = CGPointMake(0, _sizeMod-_bgSprite.size.height);
+//    _bgSprite.name = @"bgSprite";
+//    
+//    [self addChild:_bgSprite];
 
     _playSprite = [SKSpriteNode spriteNodeWithImageNamed:@"play70x40"];
     _playSprite.size = CGSizeMake(102, 60);

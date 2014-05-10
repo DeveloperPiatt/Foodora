@@ -12,6 +12,9 @@
 #import "FriendsTableViewCell.h"
 
 @interface FriendsViewController ()
+{
+    AppDelegate *aDelegate;
+}
 
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsController;
@@ -34,7 +37,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    aDelegate = DELEGATE;
     // Do any additional setup after loading the view.
     NSError *error = nil;
     if (![[self fetchedResultsController]performFetch:&error]) {
@@ -188,7 +191,7 @@
     
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"name" ascending:YES];
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = 'Nick Piatt'"];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = %@", aDelegate.userLogin];
     
     [fetchRequest setPredicate:predicate];
     
