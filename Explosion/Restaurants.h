@@ -2,7 +2,7 @@
 //  Restaurants.h
 //  Explosion
 //
-//  Created by NickPiatt on 5/9/14.
+//  Created by NickPiatt on 5/10/14.
 //  Copyright (c) 2014 iPiatt. All rights reserved.
 //
 
@@ -14,6 +14,7 @@
 @interface Restaurants : NSManagedObject
 
 @property (nonatomic, retain) NSString * name;
+@property (nonatomic, retain) NSString * database_id;
 @property (nonatomic, retain) NSSet *opinions;
 @end
 

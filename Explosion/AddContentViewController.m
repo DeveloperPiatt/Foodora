@@ -8,6 +8,7 @@
 
 #import "AddContentViewController.h"
 #import "Users.h"
+#import "Restaurants.h"
 #import "AppDelegate.h"
 
 @interface AddContentViewController ()
@@ -15,7 +16,11 @@
     NSMutableArray *_masterFriendsList;
     NSString *_friendFilter;
     
+    
+    
+    
     NSString *_getUser;
+    NSString *_getRestaurant;
     
     NSMutableArray *_masterFoodList;
     
@@ -26,6 +31,9 @@
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsController;
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerFood;
+
+@property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerGetRestaurant;
+
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerGetUser;
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultsControllerThisUser;
 
@@ -42,6 +50,38 @@
         
     }
     return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    
+    _friendFilter = @"";
+    _getUser = @"";
+    _getRestaurant = @"";
+    [filterTextField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
+    
+    
+    NSError *error;
+    if (![[self fetchedResultsController]performFetch:&error]) {
+        NSLog(@"Error! %@", error);
+        abort();
+    }
+    
+    if (isAddFriend) {
+        NSLog(@"TRUE!");
+        [titleLabel setText:@"Add Friends"];
+        [filterTextField setPlaceholder:@"Add friends ..."];
+        [self setupFriendConnection];
+    } else {
+        NSLog(@"FALSE");
+        [titleLabel setText:@"Add Food"];
+        [filterTextField setPlaceholder:@"Add food ..."];
+        [self setupFoodConnection];
+    }
+    
+    
 }
 
 -(void)setupFriendConnection
@@ -61,8 +101,25 @@
         NSLog(@"connection true");
         webData = [[NSMutableData alloc]init];
     }
+}
+
+-(void)setupFoodConnection
+{
+    //Idicates activity while table view loads data
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
+    //Initilizes NSURL object and and creates request
+    NSURL *url = [NSURL URLWithString:@"http://fishslice2000.appspot.com/restaurants.jsp"];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
     
+    //Loads url request and sends messages to delegate as the load progresses
+    connection = [NSURLConnection connectionWithRequest:request delegate:self];
+    
+    if(connection)
+    {
+        NSLog(@"connection true");
+        webData = [[NSMutableData alloc]init];
+    }
 }
 
 #pragma mark - Connection
@@ -120,6 +177,36 @@
         }
         
         [myTableView reloadData];
+    } else {
+        NSLog(@"ConnectionFinishedLoading");
+        NSDictionary *allDataDictionary = [NSJSONSerialization JSONObjectWithData:webData options:0 error:nil];
+        for (NSDictionary *restaurant in allDataDictionary)
+        {
+            
+            if (![[restaurant objectForKey:@"name"] isKindOfClass:[NSNull class]]) {
+                NSLog(@"found a restaurant -> %@", [restaurant objectForKey:@"name"]);
+                [self createRestaurant:restaurant];
+            }
+            
+        }
+        
+        NSError *error = nil;
+        if([self.managedObjectContext hasChanges]) {
+            if(![self.managedObjectContext save:&error]) {
+                NSLog(@"Save Failed: %@", [error localizedDescription]);
+            } else {
+                NSLog(@"Save Succeeded");
+            }
+        }
+        
+        self.fetchedResultsControllerFood = nil;
+        
+        if (![[self fetchedResultsControllerFood]performFetch:&error]) {
+            NSLog(@"Error! %@", error);
+            abort();
+        }
+        
+        [myTableView reloadData];
     }
     
 
@@ -148,35 +235,27 @@
     
 }
 
-- (void)viewDidLoad
+-(void)createRestaurant:(NSDictionary*)newRestaurant
 {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    _getRestaurant = [newRestaurant objectForKey:@"name"];
     
-    _friendFilter = @"";
-    _getUser = @"";
-    [filterTextField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
-    
-    
-    NSError *error;
-    if (![[self fetchedResultsController]performFetch:&error]) {
+    self.fetchedResultsControllerGetRestaurant = nil;
+    NSError *error = nil;
+    if (![[self fetchedResultsControllerGetRestaurant]performFetch:&error]) {
         NSLog(@"Error! %@", error);
         abort();
     }
-    
-    if (isAddFriend) {
-        NSLog(@"TRUE!");
-        [titleLabel setText:@"Add Friends"];
-        [filterTextField setPlaceholder:@"Add friends ..."];
-        [self setupFriendConnection];
-    } else {
-        NSLog(@"FALSE");
-        [titleLabel setText:@"Add Food"];
-        [filterTextField setPlaceholder:@"Add food ..."];
+
+    if ([[self.fetchedResultsControllerGetRestaurant fetchedObjects] count] == 0) {
+        Restaurants *restaurant = [NSEntityDescription insertNewObjectForEntityForName:@"Restaurants" inManagedObjectContext:[self managedObjectContext]];
+        
+        restaurant.name = [newRestaurant objectForKey:@"name"];
+        restaurant.database_id = [NSString stringWithFormat:@"%@", [newRestaurant objectForKey:@"id"]];
     }
     
-    
 }
+
+
 
 -(void)cancel:(id)sender
 {
@@ -190,6 +269,8 @@
 
     if (isAddFriend) {
         return [[self.fetchedResultsController fetchedObjects] count];
+    } else {
+        return [[self.fetchedResultsControllerFood fetchedObjects]count];
     }
     
     return 0;
@@ -206,8 +287,11 @@
     
     // Configure the cell...
     if (isAddFriend) {
-        Users *users = [self.fetchedResultsController objectAtIndexPath:indexPath];
-        cell.textLabel.text = users.name;
+        Users *user = [self.fetchedResultsController objectAtIndexPath:indexPath];
+        cell.textLabel.text = user.name;
+    } else {
+        Restaurants *restaurant = [self.fetchedResultsControllerFood objectAtIndexPath:indexPath];
+        cell.textLabel.text = restaurant.name;
     }
     
     return cell;
@@ -296,7 +380,7 @@
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc]init];
     NSManagedObjectContext *context = [self managedObjectContext];
     
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Users" inManagedObjectContext:context];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Restaurants" inManagedObjectContext:context];
     
     [fetchRequest setEntity:entity];
     
@@ -312,7 +396,34 @@
     
     return _fetchedResultsControllerFood;
 }
-
+-(NSFetchedResultsController*) fetchedResultsControllerGetRestaurant {
+    if (_fetchedResultsControllerGetRestaurant != nil) {
+        return _fetchedResultsControllerGetRestaurant;
+    }
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc]init];
+    NSManagedObjectContext *context = [self managedObjectContext];
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Restaurants" inManagedObjectContext:context];
+    
+    [fetchRequest setEntity:entity];
+    
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:@"name" ascending:YES];
+    NSLog(@"Predicate -> name = %@", _getRestaurant);
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = %@", _getRestaurant];
+    [fetchRequest setPredicate:predicate];
+    
+    NSArray *sortDescriptors = [[NSArray alloc]initWithObjects:sortDescriptor, nil];
+    
+    fetchRequest.sortDescriptors = sortDescriptors;
+    
+    _fetchedResultsControllerGetRestaurant = [[NSFetchedResultsController alloc]initWithFetchRequest:fetchRequest managedObjectContext:context sectionNameKeyPath:nil cacheName:nil];
+    
+    _fetchedResultsControllerGetRestaurant.delegate = self;
+    
+    return _fetchedResultsControllerGetRestaurant;
+    
+}
 -(NSFetchedResultsController*) fetchedResultsController {
     if (_fetchedResultsController != nil) {
         return _fetchedResultsController;

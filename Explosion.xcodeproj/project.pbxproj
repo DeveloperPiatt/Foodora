@@ -22,9 +22,9 @@
 		6AAC4062191C4DFD00E7F945 /* AddContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AAC4061191C4DFD00E7F945 /* AddContentViewController.m */; };
 		6AFEE5F7191C6CF400ACC9A3 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AFEE5F6191C6CF400ACC9A3 /* CoreData.framework */; };
 		6AFEE605191DC19F00ACC9A3 /* FriendsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE604191DC19F00ACC9A3 /* FriendsTableViewCell.m */; };
-		6AFEE61A191DE65600ACC9A3 /* Opinions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE619191DE65600ACC9A3 /* Opinions.m */; };
-		6AFEE61D191DE65600ACC9A3 /* Users.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE61C191DE65600ACC9A3 /* Users.m */; };
-		6AFEE620191DE65700ACC9A3 /* Restaurants.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE61F191DE65700ACC9A3 /* Restaurants.m */; };
+		6AFEE624191E7CAF00ACC9A3 /* Users.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE623191E7CAF00ACC9A3 /* Users.m */; };
+		6AFEE627191E7CB000ACC9A3 /* Restaurants.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE626191E7CB000ACC9A3 /* Restaurants.m */; };
+		6AFEE62A191E7CB000ACC9A3 /* Opinions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AFEE629191E7CB000ACC9A3 /* Opinions.m */; };
 		6AFFCC551900492E002FE74D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AFFCC541900492E002FE74D /* Foundation.framework */; };
 		6AFFCC571900492E002FE74D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AFFCC561900492E002FE74D /* CoreGraphics.framework */; };
 		6AFFCC591900492E002FE74D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AFFCC581900492E002FE74D /* UIKit.framework */; };
@@ -84,12 +84,12 @@
 		6AFEE5F6191C6CF400ACC9A3 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		6AFEE603191DC19F00ACC9A3 /* FriendsTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendsTableViewCell.h; sourceTree = "<group>"; };
 		6AFEE604191DC19F00ACC9A3 /* FriendsTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendsTableViewCell.m; sourceTree = "<group>"; };
-		6AFEE618191DE65600ACC9A3 /* Opinions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Opinions.h; sourceTree = "<group>"; };
-		6AFEE619191DE65600ACC9A3 /* Opinions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Opinions.m; sourceTree = "<group>"; };
-		6AFEE61B191DE65600ACC9A3 /* Users.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Users.h; sourceTree = "<group>"; };
-		6AFEE61C191DE65600ACC9A3 /* Users.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Users.m; sourceTree = "<group>"; };
-		6AFEE61E191DE65700ACC9A3 /* Restaurants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Restaurants.h; sourceTree = "<group>"; };
-		6AFEE61F191DE65700ACC9A3 /* Restaurants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Restaurants.m; sourceTree = "<group>"; };
+		6AFEE622191E7CAF00ACC9A3 /* Users.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Users.h; sourceTree = "<group>"; };
+		6AFEE623191E7CAF00ACC9A3 /* Users.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Users.m; sourceTree = "<group>"; };
+		6AFEE625191E7CB000ACC9A3 /* Restaurants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Restaurants.h; sourceTree = "<group>"; };
+		6AFEE626191E7CB000ACC9A3 /* Restaurants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Restaurants.m; sourceTree = "<group>"; };
+		6AFEE628191E7CB000ACC9A3 /* Opinions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Opinions.h; sourceTree = "<group>"; };
+		6AFEE629191E7CB000ACC9A3 /* Opinions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Opinions.m; sourceTree = "<group>"; };
 		6AFFCC511900492E002FE74D /* Explosion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Explosion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AFFCC541900492E002FE74D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6AFFCC561900492E002FE74D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -153,12 +153,12 @@
 		6AFEE601191C6E3800ACC9A3 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				6AFEE61E191DE65700ACC9A3 /* Restaurants.h */,
-				6AFEE61F191DE65700ACC9A3 /* Restaurants.m */,
-				6AFEE61B191DE65600ACC9A3 /* Users.h */,
-				6AFEE61C191DE65600ACC9A3 /* Users.m */,
-				6AFEE618191DE65600ACC9A3 /* Opinions.h */,
-				6AFEE619191DE65600ACC9A3 /* Opinions.m */,
+				6AFEE628191E7CB000ACC9A3 /* Opinions.h */,
+				6AFEE629191E7CB000ACC9A3 /* Opinions.m */,
+				6AFEE625191E7CB000ACC9A3 /* Restaurants.h */,
+				6AFEE626191E7CB000ACC9A3 /* Restaurants.m */,
+				6AFEE622191E7CAF00ACC9A3 /* Users.h */,
+				6AFEE623191E7CAF00ACC9A3 /* Users.m */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -172,6 +172,15 @@
 				6AFEE604191DC19F00ACC9A3 /* FriendsTableViewCell.m */,
 			);
 			name = FriendsView;
+			sourceTree = "<group>";
+		};
+		6AFEE621191E78CB00ACC9A3 /* FoodView */ = {
+			isa = PBXGroup;
+			children = (
+				6AAC405D191C4DEA00E7F945 /* FoodViewController.h */,
+				6AAC405E191C4DEA00E7F945 /* FoodViewController.m */,
+			);
+			name = FoodView;
 			sourceTree = "<group>";
 		};
 		6AFFCC481900492E002FE74D = {
@@ -210,6 +219,9 @@
 		6AFFCC5C1900492E002FE74D /* Explosion */ = {
 			isa = PBXGroup;
 			children = (
+				6AAC4060191C4DFD00E7F945 /* AddContentViewController.h */,
+				6AAC4061191C4DFD00E7F945 /* AddContentViewController.m */,
+				6AFEE621191E78CB00ACC9A3 /* FoodView */,
 				6AFEE602191DC17600ACC9A3 /* FriendsView */,
 				6AFEE601191C6E3800ACC9A3 /* CoreData */,
 				6AFFCC9019009E96002FE74D /* images */,
@@ -225,10 +237,6 @@
 				6AFFCC711900492E002FE74D /* Spaceship.png */,
 				6AFFCC731900492E002FE74D /* Images.xcassets */,
 				6AFFCC5D1900492E002FE74D /* Supporting Files */,
-				6AAC405D191C4DEA00E7F945 /* FoodViewController.h */,
-				6AAC405E191C4DEA00E7F945 /* FoodViewController.m */,
-				6AAC4060191C4DFD00E7F945 /* AddContentViewController.h */,
-				6AAC4061191C4DFD00E7F945 /* AddContentViewController.m */,
 			);
 			path = Explosion;
 			sourceTree = "<group>";
@@ -401,11 +409,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6AFEE620191DE65700ACC9A3 /* Restaurants.m in Sources */,
+				6AFEE627191E7CB000ACC9A3 /* Restaurants.m in Sources */,
 				6AFFCC701900492E002FE74D /* MyScene.m in Sources */,
 				6AFFCC6D1900492E002FE74D /* ViewController.m in Sources */,
+				6AFEE62A191E7CB000ACC9A3 /* Opinions.m in Sources */,
 				6AAC405C191C4DDE00E7F945 /* FriendsViewController.m in Sources */,
-				6AFEE61A191DE65600ACC9A3 /* Opinions.m in Sources */,
 				6AAC4062191C4DFD00E7F945 /* AddContentViewController.m in Sources */,
 				6A1BB713191183260087D0ED /* Model.xcdatamodeld in Sources */,
 				6AFFCC671900492E002FE74D /* AppDelegate.m in Sources */,
@@ -413,7 +421,7 @@
 				6AAC405F191C4DEA00E7F945 /* FoodViewController.m in Sources */,
 				6A23B4121916FAD5000DC645 /* MainScene.m in Sources */,
 				6AFEE605191DC19F00ACC9A3 /* FriendsTableViewCell.m in Sources */,
-				6AFEE61D191DE65600ACC9A3 /* Users.m in Sources */,
+				6AFEE624191E7CAF00ACC9A3 /* Users.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
